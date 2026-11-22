@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wild Russia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--tx:#f2f0f7;--mu:#8f8aa3;--ln:rgba(255,255,255,.18);--f:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden;background:#05040a;color:var(--tx);font-family:var(--f);font-weight:300}
+body::after{content:"";position:fixed;inset:0;z-index:30;pointer-events:none;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='.07'/></svg>"),radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6))}
+canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+.slide{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;justify-content:center;padding:8vh 9vw 12vh;opacity:0;visibility:hidden;transition:opacity .7s,visibility 0s .7s}
+.slide.active{opacity:1;visibility:visible;transition-delay:0s}
+.f{opacity:0;transform:translateY(22px);filter:blur(10px);transition:all .4s}
+.active .f{opacity:1;transform:none;filter:none;transition:all 1.4s cubic-bezier(.2,.8,.2,1) calc(.3s + var(--d,0)*.16s)}
+.tag{font-size:11px;letter-spacing:.45em;text-transform:uppercase;color:var(--mu);display:flex;gap:14px;align-items:center}
+.tag b{font-weight:300;color:var(--tx)}.tag::after{content:"";width:60px;height:1px;background:var(--ln)}
+h2{font-weight:200;font-size:clamp(54px,11.5vw,176px);line-height:.95;letter-spacing:-.045em;margin:.14em 0 .06em}
+.rh{font-size:clamp(12px,1.3vw,16px);letter-spacing:.4em;text-transform:uppercase;color:var(--mu);margin-bottom:3.2vh}
+.lead{font-size:clamp(16px,1.9vw,25px);line-height:1.5;max-width:36ch;margin-bottom:4vh;color:#dcd8e8}
+.ru{display:block;color:var(--mu);font-size:.72em;line-height:1.4;margin-top:.5em}
+.stats{display:flex;flex-wrap:wrap;gap:5vw;margin-bottom:4vh}
+.stats b{display:block;font-weight:200;font-size:clamp(46px,7vw,104px);line-height:1;letter-spacing:-.03em}
+.stats small{font-size:10px;letter-spacing:.35em;text-transform:uppercase;color:var(--mu)}
+.stats .ru{font-size:12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:3vw;max-width:1000px}
+.card{position:relative;padding-top:2vh}
+.card::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:var(--ln);transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.active .card::before{transform:none;transition:transform 1.6s cubic-bezier(.2,.8,.2,1) calc(.9s + var(--i)*.18s)}
+.card{opacity:0;transform:translateY(24px);filter:blur(8px);transition:all .4s}
+.active .card{opacity:1;transform:none;filter:none;transition:all 1.4s cubic-bezier(.2,.8,.2,1) calc(1s + var(--i)*.18s)}
+.card i{font-style:normal;font-size:10px;letter-spacing:.35em;color:var(--mu)}
+.card h3{font-weight:300;font-size:clamp(20px,2.3vw,30px);letter-spacing:-.01em;margin:.5em 0 .1em}
+.card h3 .ru{font-size:.5em}
+.card em{display:block;font-style:normal;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#ff9fb0;margin:1.2em 0 .5em;min-height:1em}
+.card p{font-size:clamp(13px,1.25vw,15px);line-height:1.55;color:#bdb8cf}
+.cred{display:grid;gap:4vh;margin-top:3vh}
+.cred small{display:block;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--mu);margin-bottom:.8em}
+.cred b{display:block;font-weight:200;font-size:clamp(34px,6.4vw,92px);letter-spacing:-.03em;line-height:1.05;text-shadow:0 0 50px rgba(190,150,255,.45)}
+#intro{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 1.2s,visibility 0s 1.2s}
+#intro.off{opacity:0;visibility:hidden;pointer-events:none}
+#intro h1{font-weight:200;font-size:clamp(48px,9vw,130px);letter-spacing:-.04em;line-height:1}
+#intro p{color:var(--mu);font-size:12px;letter-spacing:.5em;text-transform:uppercase;margin:1.4em 0 4vh}
+#intro button{background:none;border:1px solid var(--ln);color:var(--tx);padding:16px 38px;font:300 12px var(--f);letter-spacing:.4em;text-transform:uppercase;border-radius:40px;cursor:pointer;transition:.4s;backdrop-filter:blur(8px)}
+#intro button:hover{background:rgba(255,255,255,.12);letter-spacing:.5em}
+#intro a{margin-top:2.4vh;color:var(--mu);font-size:11px;letter-spacing:.2em;cursor:pointer}
+.ctl{position:fixed;top:3vh;right:4vw;z-index:25;display:flex;gap:22px;padding-top:env(safe-area-inset-top,0px)}
+.ctl button{background:none;border:0;color:var(--mu);font:300 11px var(--f);letter-spacing:.3em;text-transform:uppercase;cursor:pointer;transition:.3s}
+.ctl button:hover{color:var(--tx)}
+.nav{position:fixed;bottom:3.2vh;left:9vw;right:9vw;z-index:25;display:flex;align-items:center;gap:24px;padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav button{background:none;border:0;color:var(--tx);font:300 11px var(--f);letter-spacing:.35em;text-transform:uppercase;cursor:pointer;opacity:.6;transition:.3s}
+.nav button:hover{opacity:1}
+.bar{flex:1;height:1px;background:var(--ln);position:relative}.bar i{position:absolute;left:0;top:0;height:1px;background:#fff;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+@media(max-width:700px){.slide{overflow-y:auto;padding:10vh 7vw 14vh;justify-content:flex-start}.nav{left:6vw;right:6vw}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<audio id="trk" src="track.mp3" loop preload="auto"></audio>
+<div id="intro"><h1>Wild Russia</h1><p>Habitats · Animals · Дикая Россия</p><button id="go">Enter with sound</button><a id="mute">or continue without sound</a></div>
+<div class="ctl"><button id="mt">♪ Music: on</button><button id="ld">Load your track</button></div>
+<input type="file" id="fi" accept="audio/*" hidden>
+<div id="deck"></div>
+<div class="nav"><button id="p">‹ Prev</button><div class="bar"><i id="bi"></i></div><button id="n">Next ›</button></div>
+<script>
+const S=[
+{H:[265,300,215],t:"Nature project",rt:"Проект о природе",h:"Wild Russia",rh:"Дикая Россия",l:"Where animals live, and what threatens them.",rl:"Где живут животные и что им угрожает.",st:[[11,"Time zones","часовых поясов"],[17,"Million km²","млн км²"],[5,"Habitats","сред обитания"]]},
+{H:[200,215,260],t:"Habitat",rt:"Среда обитания",h:"Tundra",rh:"Тундра",l:"Frozen, treeless and brutal. The ground stays frozen all year.",rl:"Мёрзлая, безлесная, суровая. Почва заморожена круглый год.",c:[["Arctic fox","Песец","Fur hunting","Охота за мехом","Warming changes where it can live.","Потепление меняет места, где он может жить."],["Reindeer","Северный олень","Blocked routes","Перекрытые пути","Roads and pipelines cut its migration.","Дороги и трубопроводы режут пути миграции."],["Polar bear","Белый медведь","Melting ice","Таяние льда","Less sea ice means less hunting.","Меньше льда — меньше охоты на тюленей."]]},
+{H:[150,175,215],t:"Habitat",rt:"Среда обитания",h:"Taiga",rh:"Тайга",l:"The biggest forest on Earth. Silent, endless and shrinking.",rl:"Самый большой лес на Земле. Тихий, бесконечный и сокращающийся.",c:[["Amur tiger","Амурский тигр","Poaching","Браконьерство","Hunting and logging shrink its home.","Охота и вырубка сокращают его дом."],["Brown bear","Бурый медведь","Wildfires","Лесные пожары","Fires and conflicts with people.","Пожары и конфликты с людьми."],["Eurasian lynx","Рысь","Logging","Вырубка","Loses shelter when old forests fall.","Теряет укрытие, когда рубят старые леса."]]},
+{H:[28,350,300],t:"Habitat",rt:"Среда обитания",h:"Steppe",rh:"Степь",l:"Endless grass, hot summers, freezing winters and strong winds.",rl:"Бескрайняя трава, жаркое лето, ледяная зима и сильные ветры.",c:[["Saiga antelope","Сайгак","Poaching","Браконьерство","Hunted for horns and hit by sudden disease.","Охота ради рогов и внезапные болезни."],["Steppe eagle","Степной орёл","Power lines","ЛЭП","Wires kill birds, farms take nesting land.","Провода убивают птиц, поля забирают землю для гнёзд."],["Bobak marmot","Байбак","Ploughing","Распашка","Farming destroys its burrows.","Распашка уничтожает его норы."]]},
+{H:[225,255,290],t:"Habitat",rt:"Среда обитания",h:"Mountains",rh:"Горы",l:"Altai, Caucasus, Sayan. Thin air and steep rock.",rl:"Алтай, Кавказ, Саяны. Разреженный воздух и крутые скалы.",c:[["Snow leopard","Снежный барс","Very rare","Очень редкий","Poaching and fewer prey animals.","Браконьерство и меньше добычи."],["Argali","Архар","Hunting","Охота","Hunted and pushed out by livestock.","На него охотятся, а скот вытесняет его."],["Golden eagle","Беркут","Poison","Яд","Poisoned bait and disturbed nests.","Отравленные приманки и разорённые гнёзда."]]},
+{H:[182,200,235],t:"Habitat",rt:"Среда обитания",h:"Lake Baikal",rh:"Озеро Байкал",l:"The deepest and oldest lake on Earth.",rl:"Самое глубокое и древнее озеро Земли.",st:[[1642,"Meters deep","метров глубина"],[20,"% of world fresh water","% мировой пресной воды"]],c:[["Baikal seal","Байкальская нерпа","Freshwater only","Только в пресной воде","The only seal living in fresh water.","Единственный тюлень в пресной воде."],["Omul","Омуль","Overfishing","Перелов","Too much fishing and warmer water.","Слишком много вылова и тёплая вода."],["The lake","Само озеро","Pollution","Загрязнение","Plastic, waste and algae spoil clear water.","Пластик, отходы и водоросли портят чистую воду."]]},
+{H:[350,15,290],t:"Big problems",rt:"Главные проблемы",h:"The Threats",rh:"Угрозы",l:"The same dangers appear everywhere. Most come from people.",rl:"Одни и те же опасности везде. Большинство — от людей.",c:[["Climate change","Изменение климата","","","Ice melts, seasons shift, food disappears.","Лёд тает, сезоны сдвигаются, еда исчезает."],["Poaching","Браконьерство","","","Illegal hunting for fur, horns and meat.","Незаконная охота ради меха, рогов и мяса."],["Habitat loss","Потеря среды","","","Logging, farming and building cut homes apart.","Вырубка, поля и стройки разрушают дома животных."],["Fire and pollution","Пожары и загрязнение","","","Burned forests and dirty water.","Сожжённые леса и грязная вода."]]},
+{H:[160,190,270],t:"What can we do?",rt:"Что мы можем сделать?",h:"Take Action",rh:"Давайте действовать",l:"Small actions. Real impact.",rl:"Маленькие шаги. Реальный эффект.",c:[["Cut waste","Меньше мусора","","","Recycle and never litter in nature.","Сортируй мусор и не сори на природе."],["Protect forests","Защищай леса","","","Plant trees and save paper.","Сажай деревья и экономь бумагу."],["Spread the word","Расскажи другим","","","Tell friends about rare animals.","Рассказывай друзьям о редких животных."]]},
+{H:[265,300,215],t:"The end",rt:"Конец",h:"Thank you",rh:"Спасибо",cred:[["Made by · Сделал","Салимгареев Азамат"],["The best teacher · Самый лучший учитель","Азалия Азатовна"]]}
+];
+const deck=document.getElementById("deck"),ru=t=>t?'<span class="ru">'+t+'</span>':'';
+S.forEach((s,k)=>{const e=document.createElement("section");e.className="slide";
+e.innerHTML='<div class="tag f"><b>'+String(k+1).padStart(2,"0")+'</b>'+s.t+' · '+s.rt+'</div><h2 class="f" style="--d:1">'+s.h+'</h2><div class="rh f" style="--d:2">'+s.rh+'</div>'
++(s.l?'<p class="lead f" style="--d:3">'+s.l+ru(s.rl)+'</p>':'')
++(s.st?'<div class="stats f" style="--d:4">'+s.st.map(z=>'<div><b data-n="'+z[0]+'">0</b><small>'+z[1]+'</small>'+ru(z[2])+'</div>').join("")+'</div>':'')
++(s.c?'<div class="cards">'+s.c.map((c,i)=>'<div class="card" style="--i:'+i+'"><i>0'+(i+1)+'</i><h3>'+c[0]+ru(c[1])+'</h3><em>'+(c[2]?c[2]+' · '+c[3]:'')+'</em><p>'+c[4]+ru(c[5])+'</p></div>').join("")+'</div>':'')
++(s.cred?'<div class="cred">'+s.cred.map((c,i)=>'<div class="f" style="--d:'+(4+i*2)+'"><small>'+c[0]+'</small><b>'+c[1]+'</b></div>').join("")+'</div>':'');
+deck.appendChild(e)});
+const sl=[...deck.children];let cur=-1,tgt=S[0].H.slice(),hc=S[0].H.slice();
+function go(k){k=Math.max(0,Math.min(S.length-1,k));if(k===cur)return;cur=k;tgt=S[k].H;
+sl.forEach((e,i)=>e.classList.toggle("active",i===k));document.getElementById("bi").style.width=(k+1)/S.length*100+"%";
+sl[k].querySelectorAll("[data-n]").forEach(b=>{const T=+b.dataset.n,t0=performance.now()+900;(function f(t){const p=Math.max(0,Math.min(1,(t-t0)/1800));b.textContent=Math.round(T*(1-Math.pow(1-p,4))).toLocaleString("en-US");if(p<1)requestAnimationFrame(f)})(t0)})}
+document.getElementById("n").onclick=()=>go(cur+1);document.getElementById("p").onclick=()=>go(cur-1);
+addEventListener("keydown",e=>{if(["ArrowRight"," ","PageDown"].includes(e.key))go(cur+1);if(["ArrowLeft","PageUp"].includes(e.key))go(cur-1);if(e.key==="f"||e.key==="F"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}});
+let tx=0;addEventListener("touchstart",e=>tx=e.touches[0].clientX);addEventListener("touchend",e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>60)go(cur+(d<0?1:-1))});
+
+/* ---------- audio: original dreamy generative track + optional own file ---------- */
+let ac,an,syn,mg,verb,dly,on=false,file=null,fileOn=false,BPM=70,BEAT=60/BPM,BAR=BEAT*4,nb=0,bi=0,timer,data;
+const mf=n=>440*Math.pow(2,(n-69)/12);
+const CH=[[53,57,60,64,67],[57,60,64,67,71],[55,60,64,67,71],[55,59,62,64,67]],RT=[29,33,36,28];
+function initAudio(){if(ac)return;ac=new(window.AudioContext||window.webkitAudioContext)();an=ac.createAnalyser();an.fftSize=512;data=new Uint8Array(an.frequencyBinCount);
+mg=ac.createGain();mg.gain.value=.55;syn=ac.createGain();syn.connect(mg);mg.connect(an);an.connect(ac.destination);
+verb=ac.createConvolver();const L=ac.sampleRate*5,ib=ac.createBuffer(2,L,ac.sampleRate);for(let c=0;c<2;c++){const d=ib.getChannelData(c);for(let i=0;i<L;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/L,2.6)}
+verb.buffer=ib;const vg=ac.createGain();vg.gain.value=.9;verb.connect(vg);vg.connect(syn);
+dly=ac.createDelay(2);dly.delayTime.value=BEAT*.75;const fb=ac.createGain();fb.gain.value=.5;dly.connect(fb);fb.connect(dly);dly.connect(verb);dly.connect(syn)}
+function env(g,t,a,h,r,v){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.setValueAtTime(v,t+a+h);g.gain.linearRampToValueAtTime(0,t+a+h+r)}
+function bar(t,i){const c=i%4;
+CH[c].forEach(n=>{[-7,7].forEach(dt=>{const o=ac.createOscillator(),g=ac.createGain(),f=ac.createBiquadFilter();o.type="sawtooth";o.frequency.value=mf(n);o.detune.value=dt;f.type="lowpass";f.frequency.setValueAtTime(500,t);f.frequency.linearRampToValueAtTime(1300,t+BAR*.6);f.frequency.linearRampToValueAtTime(500,t+BAR*1.2);env(g,t,1.4,BAR-.4,1.6,.028);o.connect(f);f.connect(g);g.connect(syn);g.connect(verb);o.start(t);o.stop(t+BAR+3.2)})});
+[0,2.5].forEach(b=>{const tt=t+b*BEAT,o=ac.createOscillator(),o2=ac.createOscillator(),g=ac.createGain(),f=mf(RT[c]);o.type="sine";o.frequency.setValueAtTime(f*2.2,tt);o.frequency.exponentialRampToValueAtTime(f,tt+.12);o2.type="triangle";o2.frequency.value=f*2;const g2=ac.createGain();g2.gain.value=.25;g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(.9,tt+.01);g.gain.exponentialRampToValueAtTime(.001,tt+1.5);o.connect(g);o2.connect(g2);g2.connect(g);g.connect(syn);o.start(tt);o2.start(tt);o.stop(tt+1.6);o2.stop(tt+1.6)});
+for(let k=1;k<8;k+=2){const tt=t+k*BEAT/2,s=ac.createBufferSource(),b=ac.createBuffer(1,2205,ac.sampleRate),d=b.getChannelData(0);for(let j=0;j<2205;j++)d[j]=(Math.random()*2-1)*(1-j/2205);s.buffer=b;const f=ac.createBiquadFilter();f.type="highpass";f.frequency.value=7500;const g=ac.createGain();g.gain.value=.05;s.connect(f);f.connect(g);g.connect(syn);s.start(tt)}
+for(let k=0;k<8;k++)if(Math.random()<.5){const tt=t+k*BEAT/2,n=CH[c][Math.floor(Math.random()*5)]+12,o=ac.createOscillator(),g=ac.createGain();o.type="triangle";o.frequency.value=mf(n);g.gain.setValueAtTime(0,tt);g.gain.linearRampToValueAtTime(.06,tt+.02);g.gain.exponentialRampToValueAtTime(.001,tt+.9);o.connect(g);g.connect(dly);g.connect(syn);o.start(tt);o.stop(tt+1)}}
+function sched(){while(nb<ac.currentTime+2.2){bar(nb,bi++);nb+=BAR}}
+function startSynth(){initAudio();ac.resume();nb=ac.currentTime+.15;sched();timer=setInterval(sched,600);on=true;setBtn()}
+function setBtn(){document.getElementById("mt").textContent="♪ Music: "+(on?"on":"off")}
+document.getElementById("mt").onclick=()=>{if(useTrk){if(on){trk.pause();on=false}else{trk.play();on=true}setBtn();return}if(!ac&&!file){startSynth();return}
+if(fileOn){if(on){file.pause();on=false}else{file.play();on=true}}else{if(on){ac.suspend();on=false}else{ac.resume();on=true}}setBtn()};
+document.getElementById("ld").onclick=()=>document.getElementById("fi").click();
+document.getElementById("fi").onchange=e=>{const f=e.target.files[0];if(!f)return;trk.pause();useTrk=false;initAudio();clearInterval(timer);syn.gain.value=0;if(file)file.pause();ac.resume();
+file=new Audio(URL.createObjectURL(f));file.loop=true;const src=ac.createMediaElementSource(file);src.connect(mg);file.play();fileOn=true;on=true;setBtn()};
+const trk=document.getElementById("trk");let useTrk=false;
+function startTrack(){const p=trk.play();if(p&&p.then)p.then(()=>{useTrk=true;on=true;setBtn()}).catch(()=>startSynth());else startSynth()}
+document.getElementById("go").onclick=()=>{startTrack();enter()};document.getElementById("mute").onclick=()=>{on=false;setBtn();enter()};
+function enter(){document.getElementById("intro").classList.add("off");go(0)}
+
+/* ---------- canvas visuals (react to the music) ---------- */
+const cv=document.getElementById("c"),x=cv.getContext("2d");let W,H;
+function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight}rs();addEventListener("resize",rs);
+const D=Array.from({length:60},()=>({x:Math.random(),y:Math.random(),z:Math.random()*.9+.2,r:Math.random()*6}));
+let lvl=.1,bass=.1;
+(function f(t){
+let l=.12+.05*Math.sin(t/1800),b=l;
+if(ac&&on&&an){an.getByteFrequencyData(data);let s=0;for(let i=0;i<6;i++)s+=data[i];b=s/6/255;let m=0;for(let i=6;i<60;i++)m+=data[i];l=Math.min(1,m/54/180)}
+if(useTrk&&on){b=.1+.35*Math.pow(Math.max(0,Math.sin(t/1000*1.2*Math.PI*2)),6);l=.18+.1*Math.sin(t/700)}
+bass+=(b-bass)*.18;lvl+=(l-lvl)*.12;
+for(let i=0;i<3;i++)hc[i]+=(tgt[i]-hc[i])*.02;
+x.globalCompositeOperation="source-over";x.fillStyle="#05040a";x.fillRect(0,0,W,H);x.globalCompositeOperation="lighter";
+const R=Math.max(W,H),P=[[.74,.46,.5],[.56,.74,.42],[.9,.72,.38]];
+P.forEach((p,i)=>{const cx=(p[0]+Math.sin(t/4300+i*2)*.07)*W,cy=(p[1]+Math.cos(t/5100+i*3)*.07)*H,r=R*p[2]*(1+bass*.7+lvl*.25);
+const g=x.createRadialGradient(cx,cy,0,cx,cy,r);g.addColorStop(0,"hsla("+hc[i]+",85%,58%,"+(.45+bass*.35)+")");g.addColorStop(.5,"hsla("+hc[i]+",80%,40%,.14)");g.addColorStop(1,"hsla("+hc[i]+",80%,30%,0)");x.fillStyle=g;x.fillRect(0,0,W,H)});
+const cx=W*.74,cy=H*.46,mr=Math.min(W,H);
+x.globalCompositeOperation="source-over";x.lineWidth=1;
+[.2,.27,.36].forEach((k,i)=>{x.strokeStyle="rgba(255,255,255,"+(.28-i*.08)+")";x.beginPath();x.arc(cx,cy,mr*k*(1+bass*(.5-i*.12)),0,7);x.stroke()});
+D.forEach(p=>{p.y-=p.z*.0004;if(p.y<-.02){p.y=1.02;p.x=Math.random()}x.globalAlpha=(.1+.5*Math.abs(Math.sin(t/1500+p.r)))*p.z;x.fillStyle="#fff";x.beginPath();x.arc(p.x*W+Math.sin(t/3000+p.r)*10,p.y*H,p.z*1.4+bass*1.5,0,7);x.fill()});x.globalAlpha=1;
+requestAnimationFrame(f)})(0);
+</script>
+</body>
+</html>
